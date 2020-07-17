@@ -75,3 +75,42 @@ Add:
 	55 23	* * *	root	/usr/bin/rsnapshot beta > /var/log/cronlogs/beta.log # keeps 7 backups once every day for 7 saves a week
 	45 22	* * 0	root	/usr/bin/rsnapshot gamma > /var/log/cronlogs/gamma.log # keeps 4 backups once every sunday for 4 saves a month
 ~~~
+
+## More Server Help
+
+### Firewall info
+https://www.digitalocean.com/community/tutorials/how-to-list-and-delete-iptables-firewall-rules
+
+### Mounting Azure Disks
+To find disk location run : ```sudo lshw -C disk```
+Replace sdc1 with above finding https://docs.microsoft.com/en-us/azure/virtual-machines/linux/attach-disk-portal
+
+### Security Backups:
+https://phoenixnap.com/kb/automatic-security-updates-ubuntu
+
+### Setting SSH Keys up on server
+```cat ~/.ssh/id_rsa.pub | ssh username@1.1.1.1 'cat >> .ssh/authorized_keys'```
+
+### Logging
+```sudo tail -n 100 apache2/error.log```
+
+### Setting Up Lamp Stack
+https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-ubuntu-18-04
+* Before testing default apache page go into azure and set up inbound rules (May need to restart ufw as well)
+1. ```sudo a2enmod ssl```
+2. Need to move SSL folder to /etc/apache2/SSL
+3. ```cat ~/.ssh/id_rsa.pub | ssh username@1.1.1.1 'cat >> .ssh/authorized_keys'```
+4. set up sym link ```ln -s /mnt/html/project /var/www/html/project```
+5. ```sudo a2enmod rewrite```
+6. update hosts file if needed
+7. Upgrade version of codigniter to 3.1
+8. Look for diffs in system file
+9. Add user to www-data sudo usermod -a -G groupname username
+10. Install https://ourcodeworld.com/articles/read/645/how-to-install-imagick-for-php-7-in-ubuntu-16-04
+11 ```sudo apt-get install php7.2-imap```
+Switching Live:
+Make A record on go daddy
+Make sure innovative sets up internal dns record
+
+
+
