@@ -1,0 +1,128 @@
+version: '2'
+
+# The following command is an example of loading the backed up data into the volume
+# docker run -it --rm -v dbstore:/data -v 'C:\Users\ddell\MySQL scripts\Backups\:/backups' util /bin/bash -c "echo \`"exec /usr/bin/lzop -d < /backups/devsql_data.tar.lzo | tar -C /data -xf -\`" | /bin/bash"
+
+# to include all the docker-copmose*yml files: docker-compose $(ls docker-compose*yml | xargs -i echo "-f {}" | paste -sd' ') <WHATEVER>
+
+# remove ## to activate projects as needed
+# you will need uncommented by default
+
+services:
+  devsql:
+    image: library/mariadb
+    volumes:
+      - dbstore:/var/lib/mysql
+      - /var/run/mysqld
+      - ./db:/sql
+    ports:
+      - 3306:3306
+    command: "--innodb-log-file-size=256M --max-allowed-packet=128M"
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+    networks: { irs }
+
+  adminer:
+    image: clue/adminer
+    depends_on:
+      - devsql
+      - proxy
+    volumes_from:
+      - devsql
+    environment:
+      - VIRTUAL_HOST=$ADMINER_VHOST.$DOMAIN
+    links:
+      - devsql:devsql
+    networks: { irs }
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - devsql
+      - proxy
+    environment:
+      - VIRTUAL_HOST=$PHPMYADMIN_VHOST.$DOMAIN
+    links:
+      - devsql:devsql
+    networks: { irs }
+
+  #mongo:
+    #image: mongo
+    #environment:
+      #- VIRTUAL_HOST=$MONGO_VHOST.$DOMAIN
+    #networks: { irs }
+
+  # Just in case this file ever gets used to set up a production docker environment, you should NOT use the automatic proxy below but rather set it up statically.
+  # The automatic features of this container require the docker.sock file and sharing the docker.sock file, even in read-only mode, is a security risk for production.
+  # There is also a way to set this up with two containers and thus avoid exposing docker.sock to the internet connected one but I haven't researched that option
+  # completely.
+  # See: https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/
+  proxy:
+    build: images/proxy
+    image: proxy-irs
+    ports: 
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - irs
+
+  userservice:
+    build: services/userservice-server/Docker
+    image: userservice
+    depends_on:
+      - proxy
+      - devsql
+    environment:
+      - VIRTUAL_HOST=$USERSERVICE_VHOST.$DOMAIN
+    volumes:
+      - ./services/userservice-server:/var/www/html
+    networks:
+      - irs
+    links:
+      - devsql:devsql
+    external_links:
+      - lms:$LMS_VHOST.$DOMAIN
+
+  ecompliance:
+    build: services/ecompliance-git/Docker
+    image: ecompliance
+    depends_on:
+      - proxy
+      - devsql
+    environment:
+      - VIRTUAL_HOST=$ECOMPLIANCE_VHOST.$DOMAIN
+    volumes: 
+      - ./services/ecompliance-git:/var/www/html
+    links:
+      - devsql:mysql
+    external_links:
+      - userservice:$USERSERVICE_VHOST.$DOMAIN
+      - einnovative:$EINNOVATIVE_VHOST.$DOMAIN
+    networks:
+      - irs
+
+  epsm-v2:
+    build: services/epsm-v2
+    image: epsm-v2
+    depends_on:
+      - proxy
+      - devsql
+    environment:
+      - VIRTUAL_HOST=$EPSM_V2_VHOST.$DOMAIN
+    volumes: 
+      - ./services/epsm-v2:/var/www/html
+      - ./services/epsm-v2/upload:/var/www/html/epsm_uploads/upload
+    links:
+      - devsql:mysql
+    external_links:
+      - userservice:$USERSERVICE_VHOST.$DOMAIN
+    networks:
+      - irs
+
+networks:
+  irs:
+
+volumes:
+  dbstore:
+
