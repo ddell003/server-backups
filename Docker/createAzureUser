@@ -1,0 +1,4 @@
+echo "CREATE USER 'MySQLDBAdmin'@'%' IDENTIFIED BY 'whocareswhatthisis';" | mysql -uroot -pirs22952
+echo "GRANT ALL PRIVILEGES ON *.* TO 'MySQLDBAdmin'@'%';" | mysql -uroot -pirs22952
+echo "FLUSH PRIVILEGES;" | mysql -uroot -pirs22952 
+

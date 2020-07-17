@@ -93,7 +93,7 @@ https://phoenixnap.com/kb/automatic-security-updates-ubuntu
 
 ### Logging
 ```sudo tail -n 100 apache2/error.log```
-
+```file_put_contents('wonderland.txt','1', FILE_APPEND);```
 ### Setting Up Lamp Stack
 https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-ubuntu-18-04
 * Before testing default apache page go into azure and set up inbound rules (May need to restart ufw as well)
