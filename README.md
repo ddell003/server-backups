@@ -1,7 +1,7 @@
 # server-backups
 # README #
 
-This repository holds all the bash scripts needed to locally back up all of innovatives databases and webservers
+This repository holds all the bash scripts needed to locally back up all databases and webservers for a given project
 
 This should be used injunction with rsnapshot
 
